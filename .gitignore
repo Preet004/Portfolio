@@ -1,0 +1,8 @@
+node_modules/
+build/
+# dist/ is un-ignored so the build output is visible in file explorer & deployable for hosting
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example

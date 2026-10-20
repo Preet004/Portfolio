@@ -1,0 +1,82 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-headline: 'Space Grotesk', sans-serif;
+    --font-body: 'Geist', sans-serif;
+    --font-telemetry: 'JetBrains Mono', monospace;
+  }
+
+  body {
+    font-family: var(--font-body);
+    background-color: #0d0e13;
+    color: #e3e1e9;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-headline);
+  }
+
+  code, pre, .font-mono, .telemetry-font {
+    font-family: var(--font-telemetry);
+  }
+}
+
+/* Obsidian Micro-grid Backdrop */
+.bg-grid-mesh {
+  background-size: 32px 32px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+}
+
+.neon-cyan-glow {
+  box-shadow: 0 0 25px -4px rgba(0, 240, 255, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.neon-purple-glow {
+  box-shadow: 0 0 25px -4px rgba(119, 1, 208, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.neon-emerald-glow {
+  box-shadow: 0 0 25px -4px rgba(101, 242, 181, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.text-glow-cyan {
+  text-shadow: 0 0 14px rgba(0, 240, 255, 0.55);
+}
+
+.text-glow-purple {
+  text-shadow: 0 0 14px rgba(220, 183, 255, 0.55);
+}
+
+/* Glassmorphism containers */
+.glass-panel {
+  background-color: rgba(26, 27, 33, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-panel-elevated {
+  background-color: rgba(30, 31, 37, 0.85);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(0, 240, 255, 0.25);
+}
+
+/* Custom scrollbars for cyber look */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0d0e13;
+}
+::-webkit-scrollbar-thumb {
+  background: #2a2c36;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #00f0ff;
+}
