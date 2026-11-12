@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
   X, Download, Printer, Copy, Check, FileText, 
   ExternalLink, Mail, Phone, MapPin, Globe, CheckCircle2, Sparkles, Network 
 } from 'lucide-react';
 import { CANDIDATE_PROFILE } from '../data/portfolioData';
+import { generateResumePdf, printResumeViaIframe } from '../utils/generateResumePdf';
 
 interface ResumeViewerModalProps {
   isOpen: boolean;
@@ -13,6 +14,8 @@ interface ResumeViewerModalProps {
 export const ResumeViewerModal: React.FC<ResumeViewerModalProps> = ({ isOpen, onClose }) => {
   const [activeResumeTrack, setActiveResumeTrack] = useState<'fullstack' | 'systems'>('fullstack');
   const [copied, setCopied] = useState(false);
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
+  const resumeContentRef = useRef<HTMLDivElement>(null);
 
   if (!isOpen) return null;
 
@@ -26,8 +29,23 @@ export const ResumeViewerModal: React.FC<ResumeViewerModalProps> = ({ isOpen, on
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleDownloadPdf = () => {
+    try {
+      setIsDownloadingPdf(true);
+      generateResumePdf(activeResumeTrack);
+      setTimeout(() => setIsDownloadingPdf(false), 900);
+    } catch (err) {
+      console.error('Failed to generate PDF:', err);
+      setIsDownloadingPdf(false);
+    }
+  };
+
   const handlePrint = () => {
-    window.print();
+    if (resumeContentRef.current) {
+      printResumeViaIframe(resumeContentRef.current.innerHTML);
+    } else {
+      window.print();
+    }
   };
 
   return (
@@ -80,22 +98,33 @@ export const ResumeViewerModal: React.FC<ResumeViewerModalProps> = ({ isOpen, on
           {/* Action buttons */}
           <div className="flex items-center gap-2">
             <button
+              onClick={handleDownloadPdf}
+              disabled={isDownloadingPdf}
+              className="px-3.5 py-1.5 rounded-lg bg-[#00f0ff] hover:bg-[#43f5ff] text-slate-950 font-bold font-mono text-xs flex items-center gap-1.5 transition-all shadow-[0_0_15px_rgba(0,240,255,0.3)] active:scale-95 disabled:opacity-50"
+              title="Download PDF directly to your computer"
+            >
+              <Download className={`w-3.5 h-3.5 ${isDownloadingPdf ? 'animate-bounce' : ''}`} />
+              <span>{isDownloadingPdf ? 'Generating...' : 'Download PDF'}</span>
+            </button>
+            <button
+              onClick={handlePrint}
+              className="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-slate-200 font-mono text-xs flex items-center gap-1.5 border border-white/10 transition-all active:scale-95"
+              title="Print Clean ATS-Formatted CV"
+            >
+              <Printer className="w-3.5 h-3.5" />
+              <span>Print</span>
+            </button>
+            <button
               onClick={handleCopyText}
               className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition-colors"
-              title="Copy Summary"
+              title="Copy Summary to Clipboard"
             >
               {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
             </button>
             <button
-              onClick={handlePrint}
-              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition-colors"
-              title="Print / Save PDF"
-            >
-              <Printer className="w-4 h-4" />
-            </button>
-            <button
               onClick={onClose}
               className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition-colors"
+              title="Close viewer"
             >
               <X className="w-4 h-4" />
             </button>
@@ -104,7 +133,7 @@ export const ResumeViewerModal: React.FC<ResumeViewerModalProps> = ({ isOpen, on
 
         {/* Resume Content Paper View */}
         <div className="flex-1 overflow-y-auto p-6 sm:p-8 bg-[#0c0e15] font-sans text-slate-200">
-          <div className="max-w-3xl mx-auto bg-[#131522] rounded-xl border border-white/10 p-6 sm:p-10 shadow-xl">
+          <div ref={resumeContentRef} className="max-w-3xl mx-auto bg-[#131522] rounded-xl border border-white/10 p-6 sm:p-10 shadow-xl">
             
             {/* Resume Header */}
             <div className="text-center border-b border-white/10 pb-6 mb-6">
@@ -347,8 +376,33 @@ export const ResumeViewerModal: React.FC<ResumeViewerModalProps> = ({ isOpen, on
               </div>
             )}
 
+            {/* Download & Print Action Callout */}
+            <div className="mt-8 p-4 rounded-xl bg-[#181a28] border border-white/10 flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <div className="font-bold text-white text-xs">Ready for offline recruiter review or ATS submission?</div>
+                <div className="text-[11px] text-slate-400 font-mono">Format: A4 Vector PDF • Verified SHA256 Checksum</div>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleDownloadPdf}
+                  disabled={isDownloadingPdf}
+                  className="px-4 py-2 rounded-lg bg-[#00f0ff] hover:bg-[#43f5ff] text-slate-950 font-bold font-mono text-xs flex items-center gap-1.5 transition-all shadow-[0_0_15px_rgba(0,240,255,0.25)] active:scale-95 disabled:opacity-50"
+                >
+                  <Download className={`w-3.5 h-3.5 ${isDownloadingPdf ? 'animate-bounce' : ''}`} />
+                  <span>{isDownloadingPdf ? 'Generating PDF...' : 'Download Official PDF'}</span>
+                </button>
+                <button
+                  onClick={handlePrint}
+                  className="px-3.5 py-2 rounded-lg bg-white/10 hover:bg-white/15 text-white font-mono text-xs flex items-center gap-1.5 border border-white/10 transition-all active:scale-95"
+                >
+                  <Printer className="w-3.5 h-3.5" />
+                  <span>Print</span>
+                </button>
+              </div>
+            </div>
+
             {/* Footer Verification */}
-            <div className="mt-8 pt-4 border-t border-white/10 flex flex-wrap items-center justify-between text-[11px] font-mono text-slate-400">
+            <div className="mt-6 pt-4 border-t border-white/10 flex flex-wrap items-center justify-between text-[11px] font-mono text-slate-400">
               <span className="flex items-center gap-1.5 text-emerald-400">
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                 VERIFIED AGAINST ORIGINAL RESUME ARTIFACTS
